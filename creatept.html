@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Create PT</title>
+        <style>
+            body{
+                text-align: center;
+            }
+            canvas{
+                background-color: #dddddd;
+            }
+        </style>
+        <script>
+            // Canvas context; used to call Canvas methods
+            var c;
+
+            // Canvas width and height.
+            var cWidth, cHeight;
+
+            var curkeys = [];
+            
+            var newkeys = [];
+
+            //random number
+            //give min and max and this will give you random 
+            //number between them
+            function randomInt(min, max) {
+                min = Math.ceil(min);
+                max = Math.floor(max);
+                return Math.floor(Math.random() * (max - min + 1)) + min; // inclusive on min and max
+            }
+
+            //GLOBAL VARIABLES
+            var gameMode = "Start";
+            var gamePlace = "";
+            var character = "levi";
+
+            //character select 
+            var yujiSelect = new Image();
+            var leviSelect = new Image();
+
+            //class
+            class btnClass{
+                constructor(thisX, thisY, thisWidth, thisHeight, thisImg){
+                    // CONSTRUCTOR CODE
+                    this.x = thisX;
+                    this.y = thisY;
+                    this.width = thisWidth;
+                    this.height = thisHeight;
+                    this.img = new Image();
+                    this.img.src = thisImg;
+                    this.bVisible = true;
+                }
+
+                // If this pebble is visible, then draw it on the screen.
+                draw(){
+                    if(this.bVisible == true){
+                        c.drawImage(this.img, this.x, this.y, this.width, this.height);	
+                    }
+                }
+            }
+
+            //white Select
+            class whiteSelectClass{
+                constructor(thisX, thisY, thisWidth, thisHeight, thisImg){
+                    // CONSTRUCTOR CODE
+                    this.x = thisX;
+                    this.y = thisY;
+                    this.width = thisWidth;
+                    this.height = thisHeight;
+                    this.img = new Image();
+                    this.img.src = thisImg;
+                }
+
+                //move up
+                up(){
+                    this.y = this.y - 250;
+                }
+
+                //move down
+                down(){
+                    this.y = this.y + 250;
+                }
+
+                //move right
+                right(){
+                    this.x = this.x + 250;
+                }
+
+                //move left
+                left(){
+                    this.x = this.x - 250;
+                }
+
+                // If this pebble is visible, then draw it on the screen.
+                draw(){
+                    c.drawImage(this.img, this.x, this.y, this.width, this.height);	
+                }
+            }
+
+            //Hero
+                //global variables that related with hero
+            var heroHP = "";
+            var yujiD = false;
+            var sideFace = "R"
+            var punch = true;
+            class heroClass{
+                constructor(thisX, thisY, thisWidth, thisHeight, thisImg, thisSpeedN, thisSpeedP, thisHP, thisJump){
+                    // CONSTRUCTOR CODE
+                    this.x = thisX;
+                    this.y = thisY;
+                    this.width = thisWidth;
+                    this.height = thisHeight;
+                    this.img = new Image();
+                    this.img.src = thisImg;
+                    this.inAir = false;
+                    this.yFallSpeed = 0;
+                    this.speedN = thisSpeedN;
+                    this.speedP = thisSpeedP;
+                    this.hp = thisHP;
+                    this.jump = thisJump;
+                }
+                
+                //jump method
+                jumping(){
+                    //can ONLY JUMP if it is on the ground
+                    if(this.y == 410){
+                        this.curYspeed = -this.jump;
+
+                        //change the boolean for being in the air to true 
+                        //this means the bird is now in the air
+                        this.inAir = true;
+                    }
+                }
+
+                //move right
+                right(){
+                    //check if its able to go right
+                    if(this.x < 720){
+                        //check if its yuji or not
+                        if(character == "yuji"){
+                            //check if yuji used his domain or not
+                            if(yujiD == false){
+                                //move
+                                this.x = this.x + this.speedP;
+                                this.img.src = "characters/yuji/runningR.jpg"
+                                //fireball's way to fire
+                                if(bVis1 == false){
+                                    sideFace = "R"
+                                }
+                            }
+                            //if he did used his domain
+                            else{
+                                //move forward
+                                this.x = this.x + this.speedP;
+                                //fireball's way to fire
+                                if(bVis1 == false){
+                                    sideFace = "R"
+                                }
+                            }
+                        }
+                        //levi
+                        else if(character == "levi"){
+                            //levi forward
+                            this.x = this.x + this.speedP-4;
+
+                            //fireball's way to fire
+                            if(bVis1 == false){
+                                sideFace = "R"
+                            }
+                        }
+                        //if its not yuji or levi
+                        else{
+                            this.x = this.x + this.speedP;
+
+                            //fireball's way to fire
+                            if(bVis1 == false){
+                                sideFace = "R"
+                            }
+                        }
+                    }
+                    //if this have no place on board to go
+                    else{
+                        //make full stop
+                        this.speedP = 0;
+                    }
+                }
+
+                //move left
+                left(){
+                    //check if its able to move left
+                    if(this.x > 0){
+                        //check if character is yuji
+                        if(character == "yuji"){
+                            //check if yuji used domain or not
+                            if(yujiD == false){
+                                //move left
+                                this.x = this.x - this.speedN;
+                                this.img.src = "characters/yuji/runningL.jpg"
+                                //make fireball fire to left
+                                if(bVis1 == false){
+                                    sideFace = "L"
+                                }
+                            }
+                            //if yuji used his domain
+                            else{
+                                //move left
+                                this.x = this.x - this.speedN;
+                                //fireball fire to left
+                                if(bVis1 == false){
+                                    sideFace = "L"
+                                }
+                            }
+                        }
+
+                        //if character is levi
+                        else if(character == "levi"){
+                            //move left
+                            this.x = this.x - this.speedN+4;
+
+                            //make fireball fire to left
+                            if(bVis1 == false){
+                                sideFace = "L"
+                            }
+                        }
+                        //if its not yuji and levi
+                        else{
+                            //move left
+                            this.x = this.x - this.speedN;
+                            //make fireball fire to left
+                            if(bVis1 == false){
+                                sideFace = "L"
+                            }
+                        }
+                    }
+                    //if its not able to move left
+                    else{
+                        //full stop
+                        this.speedN = 0;
+                    }
+                }
+
+                //only yuji
+                skill1(){
+                    //if yuji haven't used his domain
+                    if(yujiD == false){
+                        //he opened his domain
+                        yujiD = true;
+                    }
+                    //if he already using his domain
+                    else{
+                        //closing his domain
+                        yujiD = false;
+                    }
+                }
+
+                //update method
+                //this method will update EVERY aspect of our character
+                update(){
+                    //updating hero's hp
+                    heroHP = this.hp;
+                    //if the character is in the air
+                    if(this.inAir == true){
+                        //set the y-value of the character to change by whatever the
+                        //current y speed is in the y-direction
+                        this.y += this.curYspeed;
+
+                        //reduce the magnitude of our upward velocity (i.e. make it less negative)
+                        //this will simulate the impact of gravity pulling on the character
+                        //while it is in the air
+                        this.curYspeed++;
+                        
+                        //if the character is on the ground (where we started)
+                        if(this.y >= 410){
+                            this.inAir = false;
+                        }
+                    }
+                    //check if character is yuji or not
+                    if(character == "yuji"){
+                        //checking if yuji used his domain
+                        //if he did used it
+                        if(yujiD == true){
+                            //increasing his abilities
+                            this.img.src = "characters/yuji/attack1.jpg"
+                            this.jump = 23;
+                            this.speedN = 10;
+                            this.speedP = 10;
+                            shoot.img.src = "skill/yujiDomainS1.jpg"
+                        }
+                        //if he did not used it
+                        else{
+                            //letting his ability stay same
+                            this.img.src = "characters/yuji/standing.jpg"
+                            this.width = 80;
+                            yujiD = false;
+                            this.speedN = 5;
+                            this.speedP = 5;
+                        }
+                    }
+                }
+
+                // If this pebble is visible, then draw it on the screen.
+                draw(){
+                    c.drawImage(this.img, this.x, this.y, this.width, this.height);	
+                }
+
+                // This function returns true if this intersects "obj",
+                // Returns false otherwise.
+                intersects(obj){
+                    if (this.x < obj.x + obj.width &&
+                        this.x + this.width > obj.x &&
+                        this.y < obj.y + obj.height &&
+                        this.y + this.height > obj.y)
+                    {
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+            }
+
+            //Enemy
+                //global variables that related to enemy
+            var enemyHP = "";
+            var enemyDamage = false;
+            var eSideFace = "L"
+            var enemyNumber = randomInt(1, 2)
+            class enemyClass{
+                constructor(thisX, thisY, thisWidth, thisHeight, thisImg, thisHp, thisSpeed){
+                    // CONSTRUCTOR CODE
+                    this.x = thisX;
+                    this.y = thisY;
+                    this.width = thisWidth;
+                    this.height = thisHeight;
+                    this.img = new Image();
+                    this.img.src = thisImg;
+                    this.hp = thisHp;
+                    this.speed = thisSpeed
+                }
+
+                // If this pebble is visible, then draw it on the screen.
+                draw(){
+                    c.drawImage(this.img, this.x, this.y, this.width, this.height);	
+                }
+
+                //follows where hero goes
+                follow(){
+                    //if hero's x value is higher
+                    //then add it's x value to get hero
+                    if(this.x < hero.x){
+                        //add x value
+                        this.x = this.x+this.speed
+                        //face to hero
+                        this.img.src = "characters/enemy"+enemyNumber+"/Right.png"
+                        //fire to hero
+                        if(enemyShotV == false){
+                            eSideFace = "R"
+                        }
+                    }
+                    //if hero's x value is lower
+                    //then minus it's x value to get hero
+                    else if(this.x > hero.x){
+                        //minus x value
+                        this.x = this.x-this.speed
+                        //face to hero
+                        this.img.src = "characters/enemy"+enemyNumber+"/Left.png"
+                        //fire to hero
+                        if(enemyShotV == false){
+                            eSideFace = "L"
+                        }
+                    }
+                }
+
+                //update it's hp
+                update(){
+                    enemyHP = this.hp;
+                }
+
+                // This function returns true if this intersects "obj",
+                // Returns false otherwise.
+                intersects(obj){
+                    if (this.x < obj.x + obj.width &&
+                        this.x + this.width > obj.x &&
+                        this.y < obj.y + obj.height &&
+                        this.y + this.height > obj.y)
+                    {
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+            }
+
+            //Shoot
+                //global varibal that related with shooting
+            var bVis1 = false;
+            var damage = true;
+            var enemyShotV = false;
+            var damage1 = true;
+            class shootClass{
+                constructor(thisX, thisY, thisWidth, thisHeight, thisImg, thisSide){
+                    // CONSTRUCTOR CODE
+                    this.x = thisX;
+                    this.y = thisY;
+                    this.width = thisWidth;
+                    this.height = thisHeight;
+                    this.img = new Image();
+                    this.img.src = thisImg;
+                    this.side = thisSide
+                }
+
+                // If this pebble is visible, then draw it on the screen.
+                draw(){
+                    c.drawImage(this.img, this.x, this.y, this.width, this.height);	
+                }
+
+                //update method
+                //this method will update EVERY aspect of our character
+                update(){
+                    //check if its ally hero or not
+                    if(this.side == "a"){
+                        //if the character is visible
+                        if(bVis1 == true){
+                            //check which way they want to shoot
+                            //right
+                            if(sideFace == "R"){
+                                //set the x-value of the character to change
+                                this.x += 15;
+                            }
+                            //left
+                            else if(sideFace == "L"){
+                                //set the x-value of the character to change
+                                this.x = this.x - 15;
+                            }
+
+                            //check if its still in frame
+                            if(this.x >= 800){
+                                bVis1 = false;
+                                damage = true;
+                            }
+
+                            if(this.x <= 0){
+                                bVis1 = false;
+                                damage = true;
+                            }
+                        }
+                    }
+                    //if its enemy firing
+                    else if(this.side == "e"){
+                        if(eSideFace == "R"){
+                            //set the x-value of the character to change
+                            this.x += 15;
+                        }
+                        else if(eSideFace == "L"){
+                            //set the x-value of the character to change
+                            this.x = this.x - 15;
+                        }
+
+                        //check if its still in frame
+                        if(this.x >= 800){
+                            enemyShotV = false;
+                            damage1 = false;
+                        }
+
+                        if(this.x <= 0){
+                            enemyShotV = false;
+                            damage1 = false;
+                        }
+                    }
+                }
+
+                // This function returns true if this intersects "obj",
+                // Returns false otherwise.
+                intersects(obj){
+                    if (this.x < obj.x + obj.width &&
+                        this.x + this.width > obj.x &&
+                        this.y < obj.y + obj.height &&
+                        this.y + this.height > obj.y)
+                    {
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+            }
+
+            // This timer class keeps track of how much time has elapsed
+            // since the last time it fired.
+            class timerClass{
+                constructor(timeIntervalMS){
+                    // Initialize oldTime to be the time of creation
+                    this.oldTime = new Date();
+
+                    // Set interval to elapse before the timer fires
+                    this.interval = timeIntervalMS;
+                    
+                    // Keeps track of the # of milliseconds accumulated since the last firing
+                    this.accum = 0;
+                }
+
+                // This method returns true if the timer is ready to fire, false otherwise
+                // If it returns true, then resets fire interval
+                isReady(){
+                    var curTime = new Date();
+                    var delta = curTime - this.oldTime;
+
+                    this.accum += delta;
+                    this.oldTime = curTime;
+                    if (this.accum > this.interval){
+                        this.accum = 0;
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+            }
+
+            //game buttons
+            var playBtn = new btnClass(450, 200, 200, 70, "buttons/newGame.png");
+            var customBtn = new btnClass(450, 300, 200, 70, "buttons/customGame.png");
+            
+            //background
+            var whiteSelect = new whiteSelectClass(95, 120, 160, 160, "background/whiteArea.jpg");
+
+            //character
+            var hero = new heroClass(95, 410, 80, 100, "characters/"+character+"/standing.jpg", 5, 5, 200, 15);
+
+            //enemy
+            var enemy = new enemyClass(615, 380, 100, 140, "characters/enemy"+enemyNumber+"/Left.png", enemyNumber*500/2, 2/enemyNumber)
+            var enemyCD = new timerClass(2000);
+
+            //shooting skill
+            var shoot = new shootClass(hero.x, hero.y+20, 50, 50, "skill/shooting.jpg", "a")
+            var skillCD = new timerClass(2000)
+            var enemyShoot = new shootClass(enemy.x, enemy.y+20, 50, 50, "skill/shooting.jpg", "e")
+            var enemyShotCD = new timerClass(3000)
+            var heroHit = new timerClass(1000)
+
+            // Initializes entire game framework. This method should only be called
+            // once, by the body onload event handler.
+            function gameFrameworkInit(){		
+                // Initialize key arrays
+                for (i = 0; i < 256; i++){
+                    curkeys[i] = false;
+                    newkeys[i] = false; 
+                }
+            
+                // Initialize global variables for canvas
+                c = myCanvas.getContext('2d');
+                cWidth = myCanvas.width;
+                cHeight = myCanvas.height;
+
+                // Start listeners for getting keyboard state
+                window.addEventListener('keydown',
+                                        function(e){
+                                            if (!curkeys[e.keyCode]){
+                                                curkeys[e.keyCode] = true;
+                                                newkeys[e.keyCode] = true;
+                                            }
+                                        }
+                                    );
+                
+                window.addEventListener('keyup',
+                                        function(e){ curkeys[e.keyCode] = false; }
+                                    );
+
+                // Schedule the update function to be called right before the next repaint.
+                // (At the end of the update function, it will schedule itself to be called
+                // again before the NEXT repaint, and so on.
+                window.requestAnimationFrame(gameUpdate);
+            }
+
+            //Game Update
+            //global variables that will be used in game update
+            var draftHeroLocX = 1;
+            var draftHeroLocY = 1;
+            var domain = false;
+            var custom = false;
+            function gameUpdate(){
+                //game mode Start
+                //they will choose if they wanna play 
+                //real round or custom round
+                if(gameMode == "Start"){
+                    //if user click enter bar game mode will be
+                    //draft place 
+                    if(newkeys[13]){    //Enter bar
+                        gameMode = "DraftPlace"
+                    }
+
+                    //if user click shift bar game mode will be 
+                    //draft place but game will be custom
+                    if(newkeys[16]){    //Shift bar
+                        gameMode = "DraftPlace"
+                        //only 1 enemy will be show
+                        enemyNumber = 1;
+                        //represents its getting into custom round
+                        custom = true;
+                    }
+                }
+
+                //game mode Draft Place
+                //draft place is place where you choose background
+                //of your game
+                if(gameMode == "DraftPlace"){
+                    //if they click a 
+                    //game place will be forest and 
+                    //game mode will be draft hero
+                    if(newkeys[65]){    //a
+                        gamePlace = "Forest"
+                        gameMode = "DraftHero"
+                    }
+                    //if they click s
+                    //game place will be mountain and 
+                    //game mode will be draft hero
+                    if(newkeys[83]){    //s
+                        gamePlace = "Mountain"
+                        gameMode = "DraftHero"
+                    }
+                    //if they click d
+                    //game place will be city and 
+                    //game mode will be draft hero
+                    if(newkeys[68]){    //d
+                        gamePlace = "City"
+                        gameMode = "DraftHero"
+                    }
+                    //if they click space bar 
+                    //game mode will be back start
+                    //and custom will turn off
+                    if(newkeys[32]){    //Space
+                        gameMode = "Start"
+                        custom = false;
+                    }
+                }
+
+                //game mode Draft Hero
+                //draft hero is place where you choose your character
+                if(gameMode == "DraftHero"){
+                    //if they click up arrow 
+                    //select bar will move up
+                    if(newkeys[38]){    //^
+                        //if draft hero location y is 2 or higher
+                        //it will work
+                        if(draftHeroLocY >= 2){
+                            whiteSelect.up();
+                            draftHeroLocY = draftHeroLocY - 1;
+                        }
+                    }
+
+                    //if they click right arrow 
+                    //select bar will move right 
+                    if(newkeys[39]){    //>
+                        //if draft hero location y is 1 
+                        if(draftHeroLocY == 1){
+                            //if draft hero location x is below or equal to 2
+                            //this allow this to move right
+                            if(draftHeroLocX <=2){
+                                whiteSelect.right();
+                                draftHeroLocX = draftHeroLocX + 1;
+                            }
+                        }
+                        //if its not equal 1
+                        else{
+                            //if draft hero location x is below or equal to 2
+                            //this allow this to move right
+                            if(draftHeroLocX <=2){
+                                whiteSelect.right();
+                                draftHeroLocX = draftHeroLocX + 1;
+                            }
+                        }
+                    }
+
+                    //if they click left arrow 
+                    //select bar will move left 
+                    if(newkeys[37]){    //<
+                        //if draft hero location y is 1
+                        if(draftHeroLocY == 1){
+                            //if draft hero location x is higher or equal to 2
+                            //this allow this to move left
+                            if(draftHeroLocX >=2){
+                                whiteSelect.left();
+                                draftHeroLocX = draftHeroLocX - 1;
+                            }
+                        }
+                        //if its not equal 1
+                        else{
+                            //if draft hero location x is higher or equal to 2
+                            //this allow this to move left
+                            if(draftHeroLocX >=2){
+                                whiteSelect.left();
+                                draftHeroLocX = draftHeroLocX - 1;
+                            }
+                        }
+                    }
+
+                    //if they click down arrow
+                    if(newkeys[40]){    //v
+                        //check if draft hero location y is below or equal to 1
+                        //if so it will allow to move down
+                        if(draftHeroLocY <= 1){
+                            whiteSelect.down();
+                            draftHeroLocY = draftHeroLocY + 1;
+                        }
+                    }
+
+                    //if they click enter button
+                    if(newkeys[13]){    //enter
+                        //if draft hero location x is 1 
+                        //and draft hero location y is 1
+                        //then hero is yuji
+                        if(draftHeroLocX == 1 && draftHeroLocY == 1){
+                            //if its not custom
+                            //then change gamemode to fight
+                            //and make character to yuji
+                            if(custom == false){
+                                gameMode = "fight"
+                                character = "yuji"
+                            }
+                            //if its custom
+                            //then change gamemode to custom game
+                            //and make character to yuji
+                            else{
+                                character = "yuji"
+                                gameMode = "CustomGame"
+                            }
+                            
+                        }
+                        //if draft hero location x is 2 
+                        //and draft hero location y is 1
+                        //then hero is levi
+                        else if(draftHeroLocX == 2 && draftHeroLocY == 1){
+                            //if its not custom
+                            //then change gamemode to fight
+                            //and make character to levi
+                            if(custom == false){
+                                gameMode = "fight"
+                                character = "levi"
+                            }
+                            //if its custom
+                            //then change gamemode to custom game
+                            //and make character to levi
+                            else{
+                                character = "levi"
+                                gameMode = "CustomGame"
+                            }
+                        }
+                    }
+                    //if they hit space bar
+                    //game mode will change back to draft place
+                    if(newkeys[32]){    //Space
+                        gameMode = "DraftPlace"
+                    }
+                }
+
+                //game mode fight
+                //check if gamemode is fight
+                if(gameMode == "fight"){
+                    //put hero into the box to fight
+                    hero.img.src = "characters/"+character+"/standing.jpg"
+                    //let them know what character it is using console
+                    console.log(character)
+
+                    //if character is yuji
+                    if(character == "yuji"){
+                        //update his moves
+                        hero.update();
+
+                        //jump
+                        if(newkeys[38]){    //^
+                            hero.jumping();
+                        }
+                        //move right
+                        if(curkeys[39]){    //>
+                            hero.right();
+                        }
+                        //move left
+                        if(curkeys[37]){    //<
+                            hero.left();
+                        }
+                        //using his domain
+                        if(newkeys[67]){    //c
+                            //letting hero class know
+                            //that yuji is using his domain
+                            hero.skill1();
+                            
+                            //if yuji already used domain
+                            //if he is not
+                            //make him use
+                            if(domain == false){
+                                domain = true;
+                            }
+                            //if he is
+                            //turning off his domain
+                            else if(domain == true){
+                                domain = false;
+                            }
+                        }
+                    }
+
+                    //if character is levi
+                    if(character == "levi"){
+                        //update his moves
+                        hero.update();
+
+                        //jump
+                        if(newkeys[38]){    //^
+                            hero.jumping();
+                        }
+                        //move right
+                        if(curkeys[39]){    //>
+                            hero.right();
+                        }
+                        //move left
+                        if(curkeys[37]){    //<
+                            hero.left();
+                        }
+                    }
+
+                    //shoot
+                    //if shooting skill is already
+                    //used or not if not
+                    if(bVis1 == false){
+                        //they can use it 
+                        //and show that they are shooting
+                        if(newkeys[70]){    //f
+                            bVis1 = true;
+                            shoot.x = hero.x;
+                            shoot.y = hero.y+20;
+                            //if yuji didn't used his domain
+                            //let the shooting be same
+                            if(yujiD == false){
+                                shoot.img.src = "skill/shooting.jpg"
+                            }
+                            //if he is using his domain
+                            //let the shooting show up differently
+                            else{
+                                shoot.img.src = "skill/yujiDomainS1.jpg"
+                            }
+                        }
+                    }
+                    //else if he already used shooting
+                    //and its still in the frame
+                    else if(bVis1 == true){
+                        //update its movement
+                        shoot.update();
+                    }
+
+                    //attack with hand
+                    //they can go close and hit
+                    if(newkeys[75]){    //k
+                        //check if they already used punch or not
+                        //if they haven't yet
+                        if(punch == true){
+                            //if its levi
+                            if(character == "levi"){
+                                //check if its intersecting with enemy
+                                //if they does damage the enemy
+                                //and make punch false which means he used it
+                                if(hero.intersects(enemy)){
+                                    enemy.hp = enemy.hp - 75;
+                                    punch = false;
+                                }
+                            }
+                            //if its yuji
+                            else if(character == "yuji"){
+                                //check if he is using his domain
+                                //if he is
+                                if(yujiD == true){
+                                    //check if he is intersecting with enemy
+                                    //if he is then damage the enemy with extra damage
+                                    //and make punch false which means he used it
+                                    if(hero.intersects(enemy)){
+                                        enemy.hp = enemy.hp - 75;
+                                        punch = false;
+                                    }
+                                }
+                                //if he is not
+                                else{
+                                    //check if he is intersecting with enemy
+                                    //if he is then damage the enemy
+                                    //and make punch false which means he used it
+                                    if(hero.intersects(enemy)){
+                                        enemy.hp = enemy.hp - 25;
+                                        punch = false;
+                                    }
+                                }
+                            }
+                            //if its other hero than main two
+                            else{
+                                //check if he is intersecting with enemy
+                                //if he/she is then damage the enemy
+                                //and make punch false which means he/she used it
+                                if(hero.intersects(enemy)){
+                                    enemy.hp = enemy.hp - 25;
+                                    punch = false;
+                                }
+                            }
+                        }
+                    }
+
+                    //if they have used punch
+                    if(punch == false){
+                        //run the cooldown
+                        //then make punch ready
+                        if(heroHit.isReady()){
+                            punch = true;
+                        }
+                    }
+
+                    //update the enemy moves
+                    enemy.update();
+                    //check if shoot is intersect with enemy
+                    if(shoot.intersects(enemy)){
+                        //check if yuji used his domain
+                        //if he is not
+                        if(yujiD == false){
+                            //check if shoot still have damage
+                            if(damage == true){
+                                //damage the enemy dude and
+                                //make shoot have no damage
+                                enemy.hp = enemy.hp - 25;
+                                damage = false;
+                            }
+                        }
+                        //if he is
+                        else if(yujiD == true){
+                            //check if shoot still have damage
+                            if(damage == true){
+                                //damage the enemy dude with extra damage
+                                //and make shoot have no damage
+                                enemy.hp = enemy.hp - 75;
+                                damage = false;
+                            }
+                        }
+                    }
+
+                    //enemy moves that is attack to player
+                    //let enemy follow player
+                    enemy.follow();
+                    //check if enemy intersects with hero
+                    if(enemy.intersects(hero)){
+                        //check if enemy still have his damage
+                        //if he is 
+                        if(enemyDamage == true){
+                            //check if character is levi
+                            //if its levi then 
+                            //make a damage lower and make enemy damage off
+                            if(character == "levi"){
+                                hero.hp = hero.hp - 25;
+                                enemyDamage = false;
+                            }
+                            //if its not levi
+                            //just take a damage from hero 
+                            //and turn off the damage of enemy
+                            else{
+                                hero.hp = hero.hp - 50;
+                                enemyDamage = false;
+                            }
+                        }
+                        //if he is not
+                        else{
+                            //run his cooldown
+                            //and after his cooldown is over 
+                            //make his damage on
+                            if(enemyCD.isReady()){
+                                enemyDamage = true;
+                            }
+                        }
+                    }
+
+                    //check if enemy's shooting skill hit hero
+                    if(enemyShoot.intersects(hero)){
+                        //check if that shooting still have damage on
+                        if(damage1 == true){
+                            //check if its levi or not
+                            //if it is
+                            //deal lower damage and turn off the damage
+                            if(character == "levi"){
+                                hero.hp = hero.hp - 35;
+                                damage1 = false;
+                            }
+                            //if its not 
+                            //deal normal damage then turn off the damage
+                            else{
+                                hero.hp = hero.hp - 75;
+                                damage1 = false;
+                            }
+                        }
+                    }
+
+                    //if enemy's skill is in cooldown
+                    //and cooldown is over make the damage ready
+                    //and the positions ready
+                    if(enemyShotCD.isReady()){
+                        enemyShotV = true;
+                        damage1 = true;
+                        enemyShoot.x = enemy.x;
+                    }
+
+                    //check if enemy shot is visible or not
+                    //if it is visible then update itself
+                    if(enemyShotV == true){
+                        enemyShoot.update();
+                    }
+                    
+                    //if two shooting skills collapsed with each other
+                    //check if both of them is visible
+                    if(bVis1 == true && enemyShotV == true){
+                        //check if they intersecting
+                        //then make both of them invisible
+                        if(shoot.intersects(enemyShoot)){
+                            enemyShotV = false;
+                            bVis1 = false;
+                        }
+                    }
+
+                    //check if enemy died
+                    //if it is 
+                    //then make game mode into after win
+                    if(enemyHP <= 0){
+                        gameMode = "afterWin"
+                    }
+
+                    //check if enemy died
+                    //if it is 
+                    //then make game mode into after lose
+                    if(heroHP <= 0){
+                        gameMode = "afterLose"
+                    }
+                }
+
+                //afterWin
+                //if game mode is after win
+                if(gameMode == "afterWin"){
+                    //show enemy dead
+                    enemy.img.src = "characters/dead.jpg"
+
+                    //if they click enter bar
+                    //make everything reset
+                    if(newkeys[13]){    //enter
+                        enemyNumber = randomInt(1, 2)
+                        enemy.hp = enemyNumber*500/2;
+                        hero.hp = 200;
+                        yujiD = false;
+                        hero.x = 95;
+                        hero.y = 410;
+                        enemy.x = 615;
+                        enemy.y = 380;
+                        bVis1 = false;
+                        enemyShotV = false;
+                        domain = false;
+                        character = "";
+                        gameMode = "Start"
+                    }
+                }
+
+                //afterLose
+                //check if game mode is after lose
+                if(gameMode == "afterLose"){
+                    //make hero dead
+                    hero.img.src = "characters/dead.jpg"
+
+                    //if they click enter bar
+                    //make everything reset
+                    if(newkeys[13]){    //enter
+                        enemyNumber = randomInt(1, 2)
+                        enemy.hp = enemyNumber*500/2;
+                        hero.hp = 200;
+                        yujiD = false;
+                        hero.x = 95;
+                        hero.y = 410;
+                        enemy.x = 615;
+                        enemy.y = 380;
+                        bVis1 = false;
+                        enemyShotV = false;
+                        domain = false;
+                        hero.img.src = "character"
+                        gameMode = "Start"
+                    }
+                }
+
+                //Custom Game
+                //if game mode is custom game
+                if(gameMode == "CustomGame"){
+                    //show image of hero and enemy
+                    hero.img.src = "characters/"+character+"/standing.jpg"
+                    enemy.img.src = "characters/enemy"+enemyNumber+"/Left.png"
+                    //show what hero they have chosen in the console
+                    console.log(character)
+
+                    //if character is yuji
+                    if(character == "yuji"){
+                        //update his moves
+                        hero.update();
+
+                        //jump
+                        if(newkeys[38]){    //^
+                            hero.jumping();
+                        }
+                        //move right
+                        if(curkeys[39]){    //>
+                            hero.right();
+                        }
+                        //move left
+                        if(curkeys[37]){    //<
+                            hero.left();
+                        }
+                        //using his domain
+                        if(newkeys[67]){    //c
+                            //letting hero class know
+                            //that yuji is using his domain
+                            hero.skill1();
+                            
+                            //if yuji already used domain
+                            //if he is not
+                            //make him use
+                            if(domain == false){
+                                domain = true;
+                            }
+                            //if he is
+                            //turning off his domain
+                            else if(domain == true){
+                                domain = false;
+                            }
+                        }
+                    }
+
+                    //if character is levi
+                    if(character == "levi"){
+                        //update his moves
+                        hero.update();
+
+                        //jump
+                        if(newkeys[38]){    //^
+                            hero.jumping();
+                        }
+                        //move right
+                        if(curkeys[39]){    //>
+                            hero.right();
+                        }
+                        //move left
+                        if(curkeys[37]){    //<
+                            hero.left();
+                        }
+                    }
+
+                    //shoot
+                    //if shooting skill is already
+                    //used or not if not
+                    if(bVis1 == false){
+                        //they can use it 
+                        //and show that they are shooting
+                        if(newkeys[70]){    //f
+                            bVis1 = true;
+                            shoot.x = hero.x;
+                            shoot.y = hero.y+20;
+                            //if yuji didn't used his domain
+                            //let the shooting be same
+                            if(yujiD == false){
+                                shoot.img.src = "skill/shooting.jpg"
+                            }
+                            //if he is using his domain
+                            //let the shooting show up differently
+                            else{
+                                shoot.img.src = "skill/yujiDomainS1.jpg"
+                            }
+                        }
+                    }
+                    //else if he already used shooting
+                    //and its still in the frame
+                    else if(bVis1 == true){
+                        //update its movement
+                        shoot.update();
+                    }
+
+                    //attack with hand
+                    //they can go close and hit
+                    if(newkeys[75]){    //k
+                        //check if they already used punch or not
+                        //if they haven't yet
+                        if(punch == true){
+                            //if its levi
+                            if(character == "levi"){
+                                //check if its intersecting with enemy
+                                //if they does damage the enemy
+                                //and make punch false which means he used it
+                                if(hero.intersects(enemy)){
+                                    enemy.hp = enemy.hp - 75;
+                                    punch = false;
+                                }
+                            }
+                            //if its yuji
+                            else if(character == "yuji"){
+                                //check if he is using his domain
+                                //if he is
+                                if(yujiD == true){
+                                    //check if he is intersecting with enemy
+                                    //if he is then damage the enemy with extra damage
+                                    //and make punch false which means he used it
+                                    if(hero.intersects(enemy)){
+                                        enemy.hp = enemy.hp - 75;
+                                        punch = false;
+                                    }
+                                }
+                                //if he is not
+                                else{
+                                    //check if he is intersecting with enemy
+                                    //if he is then damage the enemy
+                                    //and make punch false which means he used it
+                                    if(hero.intersects(enemy)){
+                                        enemy.hp = enemy.hp - 25;
+                                        punch = false;
+                                    }
+                                }
+                            }
+                            //if its other hero than main two
+                            else{
+                                //check if he is intersecting with enemy
+                                //if he/she is then damage the enemy
+                                //and make punch false which means he/she used it
+                                if(hero.intersects(enemy)){
+                                    enemy.hp = enemy.hp - 25;
+                                    punch = false;
+                                }
+                            }
+                        }
+                    }
+
+                    //if they have used punch
+                    if(punch == false){
+                        //run the cooldown
+                        //then make punch ready
+                        if(heroHit.isReady()){
+                            punch = true;
+                        }
+                    }
+
+                    //damaging enemy dudes
+                    //let enemy stay in one position
+                    enemy.x = 370;
+                    enemy.y = 380;
+
+                    //update the enemy moves
+                    enemy.update();
+                    //check if shoot is intersect with enemy
+                    if(shoot.intersects(enemy)){
+                        //check if yuji used his domain
+                        //if he is not
+                        if(yujiD == false){
+                            //check if shoot still have damage
+                            if(damage == true){
+                                //damage the enemy dude and
+                                //make shoot have no damage
+                                enemy.hp = enemy.hp - 25;
+                                damage = false;
+                            }
+                        }
+                        //if he is
+                        else if(yujiD == true){
+                            //check if shoot still have damage
+                            if(damage == true){
+                                //damage the enemy dude with extra damage
+                                //and make shoot have no damage
+                                enemy.hp = enemy.hp - 75;
+                                damage = false;
+                            }
+                        }
+                    }
+
+                    //check if enemy died
+                    //make their hp 250
+                    if(enemyHP <= 0){
+                        enemy.hp = 250
+                    }
+
+                    //if they click space bar
+                    //let them go back to start
+                    if(newkeys[32]){    //Space
+                        gameMode = "Start"
+                        custom = false;
+                    }
+                }
+
+                // Reset newkeys
+                for (i = 0; i < 256; i++){
+                    newkeys[i] = false;
+                }
+
+                // At the end of the update function, repaint the screen
+                gameDraw();
+                    
+                // Last thing the update function does is to schedule itself to be called
+                // again before the next repaint
+                window.requestAnimationFrame(gameUpdate);
+            }
+
+            function gameDraw(){
+                // Clear the canvas before we draw the current frame
+                c.clearRect(0,0,cWidth,cHeight);
+
+                //start
+                if(gameMode == "Start"){
+                    //background image draw
+                    var bg = new Image();
+                    bg.src = "background/kingdom.jpg";
+                    c.drawImage(bg, 0, 0, 800, 600)
+
+                    //two button draw
+                    playBtn.draw();
+                    customBtn.draw();
+                }
+
+                //draft place
+                if(gameMode == "DraftPlace"){
+                    //background image
+                    var bg = new Image();
+                    bg.src = "background/selectPlace.jpg";
+                    c.drawImage(bg, 0, 0, 800, 600)
+
+                    //instruction draw
+                    c.fillStyle = "Black"
+                    c.font = "50px Times"
+				    c.fillText("Choose Your Battle Field", 150, 80)
+
+                    //first place
+                    c.font = "30px Times"
+                    c.fillStyle  = "Red"
+				    c.fillText("Forest(a)", 80, 150)
+                    var forest = new Image();
+                    forest.src = "background/battlefieldWood.jpg";
+                    c.drawImage(forest, 35, 175, 200, 100)
+
+                    //second place
+                    c.font = "30px Times"
+				    c.fillText("Mountain(s)", 310, 150)
+                    var mountain = new Image();
+                    mountain.src = "background/battlefieldMountains.jpg";
+                    c.drawImage(mountain, 285, 175, 200, 100)
+
+                    //third place
+                    c.font = "30px Times"
+				    c.fillText("City(d)", 610, 150)
+                    var city = new Image();
+                    city.src = "background/battlefieldCity.jpg";
+                    c.drawImage(city, 550, 175, 200, 100)
+
+                    //go back
+                    c.font = "20px Times"
+                    c.fillStyle = "black"
+                    c.fillText("Space bar to go back", 320, 100)
+                }
+                
+                //draft hero
+                if(gameMode == "DraftHero"){
+                    //if game place is forest
+                    //make background forest
+                    if(gamePlace == "Forest"){
+                        var bg = new Image();
+                        bg.src = "background/selectHeroF.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is mountain
+                    //make background mountain
+                    if(gamePlace == "Mountain"){
+                        var bg = new Image();
+                        bg.src = "background/selectHeroM.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is city
+                    //make background city
+                    if(gamePlace == "City"){
+                        var bg = new Image();
+                        bg.src = "background/selectHeroC.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //make white small background of word 3 of them
+                    var white1 = new Image();
+                    white1.src = "background/whiteArea.jpg";
+                    c.drawImage(white1, 245, 10, 310, 40)
+                    c.drawImage(white1, 295, 95, 220, 20)
+                    c.drawImage(white1, 295, 60, 220, 20)
+
+                    //instroction
+                    c.font = "30px Times"
+                    c.fillStyle = "#0"
+				    c.fillText("Pick Your Hero To Fight", 250, 40)
+                    
+                    c.font = "20px Times"
+                    c.fillStyle = "#0"
+				    c.fillText("Enter when you are ready!", 300, 110)
+
+                    //draw white select space
+                    whiteSelect.draw();
+
+                    //yuji draw
+                    yujiSelect.src = "characters/yuji/yujiPro.jpg";
+                    c.drawImage(yujiSelect, 100, 125, 150, 150)
+
+                    //levi draw
+                    leviSelect.src = "characters/levi/leviPro.jpg";
+                    c.drawImage(leviSelect, 350, 125, 150, 150)
+
+                    //go back
+                    c.font = "20px Times"
+                    c.fillStyle = "black"
+                    c.fillText("Space bar to go back", 320, 75)
+                }
+
+                //fight
+                if(gameMode == "fight"){
+                    //if game place is forest
+                    //make background forest
+                    if(gamePlace == "Forest"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldWood.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is mountain
+                    //make background mountain
+                    if(gamePlace == "Mountain"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldMountains.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is city
+                    //make background city
+                    if(gamePlace == "City"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldCity.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if yuji using his domain
+                    //make background his domain
+                    if(domain == true){
+                        var bg = new Image();
+                        bg.src = "background/SukunaDomain.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //enemy draw
+                    enemy.draw();
+                    c.font = "30px Times"
+                    c.fillStyle = "#0"
+                    c.fillText(enemyHP, enemy.x+enemy.width/4, enemy.y-10)
+                    
+                    //characters draw
+                    hero.draw();
+
+                    //if hero hp is higher than 0
+                    //then show hero's hp
+                    if(heroHP > 0){
+                        c.font = "30px Times"
+                        c.fillStyle = "#0"
+                        c.fillText(heroHP, hero.x+hero.width/4, hero.y-10)
+                    }
+
+                    //shooting skill
+                    //check if its visible
+                    if(bVis1 == true){
+                        shoot.draw();
+                    }
+
+                    //enemy shooting skill
+                    //check if its visible
+                    if(enemyShotV == true){
+                        enemyShoot.draw();
+                    }
+                }
+
+                //afterLose
+                //if game mode is lose
+                if(gameMode == "afterLose"){
+                    //if game place is forest
+                    //make background forest
+                    if(gamePlace == "Forest"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldWood.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is mountain
+                    //make background mountain
+                    if(gamePlace == "Mountain"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldMountains.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is city
+                    //make background city
+                    if(gamePlace == "City"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldCity.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //enemy draw
+                    enemy.draw();
+
+                    //characters draw
+                    hero.draw();
+
+                    //word to make player jelious
+                    //idk if i spelled jelious correctly lol
+                    c.font = "50px Times"
+                    c.fillStyle = "black"
+                    c.fillText("Aww man! You lost lol.", 200, 250)
+                    c.fillText("Enter to play again", 200, 325)
+                }
+
+                //afterWin
+                if(gameMode == "afterWin"){
+                    //if game place is forest
+                    //make background forest
+                    if(gamePlace == "Forest"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldWood.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is mountain
+                    //make background mountain
+                    if(gamePlace == "Mountain"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldMountains.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is city
+                    //make background city
+                    if(gamePlace == "City"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldCity.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //enemy draw
+                    enemy.draw();
+
+                    //characters draw
+                    hero.draw();
+
+                    //word that make player happy
+                    c.font = "50px Times"
+                    c.fillStyle = "black"
+                    c.fillText("Excelent Job, You won!", 200, 250)
+                    c.fillText("Enter to play again", 200, 325)
+                }
+
+                //Custom Game
+                if(gameMode == "CustomGame"){
+                    //if game place is forest
+                    //make background forest
+                    if(gamePlace == "Forest"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldWood.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is mountain
+                    //make background mountain
+                    if(gamePlace == "Mountain"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldMountains.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if game place is city
+                    //make background city
+                    if(gamePlace == "City"){
+                        var bg = new Image();
+                        bg.src = "background/battlefieldCity.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //if yuji using his domain
+                    //make background his domain
+                    if(domain == true){
+                        var bg = new Image();
+                        bg.src = "background/SukunaDomain.jpg";
+                        c.drawImage(bg, 0, 0, 800, 600)
+                    }
+
+                    //enemy draw freak this dude killed me so many times
+                    //dude how is it possible to die to ur own game omg lol
+                    enemy.draw();
+                    c.font = "30px Times"
+                    c.fillStyle = "#0"
+                    c.fillText(enemyHP, enemy.x+enemy.width/4, enemy.y-10)
+                    
+                    //characters draw
+                    hero.draw();
+
+                    //shooting skill
+                    //check if its visible
+                    if(bVis1 == true){
+                        shoot.draw();
+                    }
+
+                    //if hero is yuji
+                    if(character == "yuji"){
+                        //background for instruction
+                        var white1 = new Image();
+                        white1.src = "background/whiteArea.jpg";
+                        c.drawImage(white1, 15, 10, 325, 300)
+
+                        //instruction for hero
+                        c.font = "20px Times"
+                        c.fillStyle = "black"
+                        c.fillText("Hero Name: Yuji Itadori", 20, 25)
+                        c.fillText("Hero Hp: 200", 20, 50)
+                        c.fillText("Hero Skills:", 20, 75)
+                        c.fillText("Right arrow to move right", 40, 100)
+                        c.fillText("Left arrow to move left", 40, 125)
+                        c.fillText("Up arrow to jump", 40, 150)
+                        c.fillText("Use button k to punch", 40, 175)
+                        c.fillText("Use key f to throw a fireball", 40, 200)
+                        c.fillText("Use key c to get into your world", 40, 225)
+                        c.fillText("In your world your damage increases", 40, 250)
+                        c.fillText("Basicly he called Sukuna", 40, 275)
+                        c.fillText("Space bar to go back", 20, 300)
+                    }
+                    //if hero is levi
+                    else if(character == "levi"){
+                        //background for instruction
+                        var white1 = new Image();
+                        white1.src = "background/whiteArea.jpg";
+                        c.drawImage(white1, 15, 10, 420, 275)
+
+                        //instruction for hero
+                        c.font = "20px Times"
+                        c.fillStyle = "black"
+                        c.fillText("Hero Name: Levi Ackerman ", 20, 25)
+                        c.fillText("Hero Hp: 200", 20, 50)
+                        c.fillText("Hero Skills:", 20, 75)
+                        c.fillText("Right arrow to move right", 40, 100)
+                        c.fillText("Left arrow to move left", 40, 125)
+                        c.fillText("Up arrow to jump", 40, 150)
+                        c.fillText("Use button k to punch", 40, 175)
+                        c.fillText("Use key f to throw a fireball", 40, 200)
+                        c.fillText("This hero have good defend against enemy damage", 20, 225)
+                        c.fillText("And have more hard punch damage than others", 20, 250)
+                        c.fillText("Space bar to go back", 20, 275)
+                    }
+                }
+            }
+        </script>
+    </head>
+
+    <body onload="gameFrameworkInit()">
+            <!-- canva -->
+            <canvas id="myCanvas" width="800" height="600"></canvas>
+    </body>
+</html>
